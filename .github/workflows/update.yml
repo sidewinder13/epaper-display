@@ -2,8 +2,8 @@ name: Update E-Paper Display Image
 
 on:
   schedule:
-    - cron: '0 * * * *' # 🔥 Τρέχει αυτόματα κάθε 1 ώρα
-  workflow_dispatch:   # 🔥 Μας επιτρέπει να το τρέχουμε χειροκίνητα για δοκιμή
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
