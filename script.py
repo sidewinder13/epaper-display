@@ -2,7 +2,7 @@ import urllib.request
 import zlib
 
 # ✅ ΕΝΤΟΛΗ: Το URL είναι γραμμένο ΑΥΣΤΗΡΑ με αστεράκια (*) παντού!
-GOOGLE_SCRIPT_URL_STARS = "h*t*t*p*s*:*/*/*s*c*r*i*p*t*.*g*o*o*g*l*e*.*c*o*m*/*m*a*c*r*o*s*/*s*/*A*K*f*y*c*b*z*X*0*f*W*8*l*z*_*f*n*K*f*b*j*U*x*b*I*M*A*I*S*9*y*P*w*-*c*p*b*_*8*Z*B*l*x*G*9*n*v*N*H*w*K*F*B*r*g*d*3*D*G*W*2*s*4*H*Q*W*U*0*K*c*m*K*A*/*e*x*e*c"
+"h*t*t*p*s*:*/*/*s*c*r*i*p*t*.*g*o*o*g*l*e*.*c*o*m*/*m*a*c*r*o*s*/*s*/*A*K*f*y*c*b*z*X*0*f*W*8*l*z*_*f*n*K*f*b*j*U*x*b*I*M*A*I*S*9*y*P*w*-*c*p*b*_*8*Z*B*l*x*G*9*n*v*N*H*w*K*F*B*r*g*d*3*D*G*W*2*s*4*H*Q*W*U*0*K*c*m*K*A*/*e*x*e*c"
 
 def main():
     print("Έναρξη λήψης binary PNG από τη Google...")
