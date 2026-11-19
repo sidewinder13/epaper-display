@@ -17,6 +17,9 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Install Pillow Library
+        run: pip install Pillow
+
       - name: Run Python Bit-Packer
         run: python script.py
 
