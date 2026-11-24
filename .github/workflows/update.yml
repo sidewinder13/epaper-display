@@ -1,8 +1,8 @@
 name: Update E-Paper Display Image
 
 on:
-  schedule:
-  - cron: '0 4,10,19 * * *'
+  repository_dispatch:
+    types: [esp32_ping]
   workflow_dispatch:
 
 jobs:
@@ -27,7 +27,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@://github.com"
-          # ✅ ΔΙΟΡΘΩΘΗΚΕ: Ανεβάζει live και το image.bin και το preview.png μαζί
           git add image.bin preview.png
-          git commit -m "Automated update of epaper images and preview" || echo "No changes to commit"
+          git commit -m "Live image update triggered by ESP32 hardware ping" || echo "No changes to commit"
           git push
