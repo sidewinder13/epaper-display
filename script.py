@@ -10,8 +10,6 @@ BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
 
-
-
 print("🚀 Έναρξη Server-Side Python Guard...")
 
 # Low-level συνάρτηση αφαίρεσης αστερίσκων
@@ -22,6 +20,7 @@ try:
     print("📡 Λήψη εικόνας από το Google Slide Proxy...")
     response = requests.get(clean_url, timeout=30)
     if response.status_code == 200:
+        # ✅ ΔΙΟΡΘΩΣΗ: Καθαρό, μονό άνοιγμα αρχείου χωρίς διπλά μπλοκ
         with open(TEMP_PNG, "wb") as f:
             f.write(response.content)
         print("✅ Η εικόνα κατέβηκε επιτυχώς.")
@@ -81,8 +80,3 @@ if os.path.exists(TEMP_PNG):
     os.remove(TEMP_PNG)
 
 print("🏁 Server-Side Guard ολοκληρώθηκε.")
-
-
-
-
-
