@@ -1,94 +1,88 @@
-import urllib.request
-import zlib
-import sys
+
+import os
+import requests
 from PIL import Image
 
 # 📋 Τάσο, εδώ υπάρχει URL! Πήγαινε στη γραμμή 7 να το δεις και βάλε το δικό σου:
 GOOGLE_SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnT4GV0xXgvAMTwsn85M4KmiXfRAEENM5HmWedc6JAbwn3uBpJWMyVyGZ-fUjVy5JoR6yRm2OqUJtwyVyjL572Rl3XV31KCVomrARSwNos-ORP3PljSb4z7jwQsiJUbtox3KGlthoh6JhMCsMotj4kNqqXt0VfWVa6FWSEEJpF7QXxcoqsNsJ4HB2G4r_v0hq7UDsWVTM1-5U5D9ezo-xWf3PfUbr7-gqRp4ps_t3v3UwzJdVnBULv0c4uUU24-ErNcTo_471uD6ZbAyZlV1_OGN2OHPeQ&lib=Mm1ufKnYuJ-Ps5c1lsDNhXOhMY1gs6E2h"
 
-def main():
-    print("Έναρξη λήψης Signed Bytes True RGB text stream από τη Google...")
-    try:
-        req = urllib.request.Request(GOOGLE_SCRIPT_URL, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req) as response:
-            csv_text = response.read().decode('utf-8')
-        
-        signed_bytes = [int(x) for x in csv_text.split(',') if x.strip() != '']
-        print(f"Λήψη επιτυχής! Πλήθος στοιχείων κειμένου: {len(signed_bytes)}")
-        
-        png_bytes = bytearray()
-        for b in signed_bytes:
-            if b < 0:
-                png_bytes.append(b + 256)
-            else:
-                png_bytes.append(b)
-                
-        width = 400
-        height = 300
-        channel_size = (width * height) // 8
-        
-        black_buffer = bytearray([0xFF] * channel_size)
-        red_buffer = bytearray([0xFF] * channel_size)
-        
-        idat_data = bytearray()
-        pos = 8
-        
-        while pos < len(png_bytes) - 4:
-            chunk_len = int.from_bytes(png_bytes[pos:pos+4], byteorder='big')
-            if pos + 8 + chunk_len > len(png_bytes):
-                break
-            chunk_type = png_bytes[pos+4:pos+8]
-            
-            if chunk_type == b'IDAT':
-                idat_data.extend(png_bytes[pos+8:pos+8+chunk_len])
-            elif chunk_type == b'IEND':
-                break
-            pos += 12 + chunk_len
-            
-        print(f"Συγκέντρωση True RGB δεδομένων IDAT: {len(idat_data)} bytes. Αποσυμπίεση...")
-        decompressed = zlib.decompress(idat_data)
-        
-        # Δημιουργία έγχρωμης εικόνας preview (Pillow)
-        preview_img = Image.new("RGB", (width, height), "white")
-        preview_pixels = preview_img.load()
-        
-        # Ανάγνωση True RGB pixels (3 bytes ανά pixel + 1 filter byte ανά scanline)
-        pixel_idx = 0
-        stride = width * 3 + 1 # 1 byte φίλτρου + 1200 bytes pixels (400 * 3)
-        
-        for y in range(height):
-            row_start = y * stride + 1
-            for x in range(width):
-                p = row_start + x * 3
-                if p + 2 < len(decompressed):
-                    r = decompressed[p]
-                    g = decompressed[p+1]
-                    b = decompressed[p+2]
-                    
-                    byte_idx = pixel_idx // 8
-                    bit_shift = 7 - (pixel_idx % 8)
-                    
-                    # Hardware thresholds για True RGB αποχρώσεις
-                    if r > 130 and g < 100 and b < 100:
-                        red_buffer[byte_idx] &= ~(1 << bit_shift)   # Κόκκινο hardware
-                        preview_pixels[x, y] = (255, 0, 0)          # Κόκκινο preview
-                    elif r < 120 and g < 120 and b < 120:
-                        black_buffer[byte_idx] &= ~(1 << bit_shift) # Μαύρο hardware
-                        preview_pixels[x, y] = (0, 0, 0)            # Μαύρο preview
-                        
-                pixel_idx += 1
-                
-        final_bytes = black_buffer + red_buffer
-        
-        with open("image.bin", "wb") as f:
-            f.write(final_bytes)
-            
-        preview_img.save("preview.png")
-        print("✅ Επιτυχία! Τα αρχεία image.bin και preview.png δημιουργήθηκαν True RGB!")
-        
-    except Exception as e:
-        print(f"❌ Σφάλμα κατά την εκτέλεση: {str(e)}")
-        sys.exit(1)
+BIN_PATH = "image.bin"
+TEMP_PNG = "temp_slide.png"
+TEMP_BIN = "temp_image.bin"
 
-if __name__ == "__main__":
-    main()
+
+
+print("🚀 Έναρξη Server-Side Python Guard...")
+
+# Low-level συνάρτηση αφαίρεσης αστερίσκων
+clean_url = GOOGLE_SCRIPT_URL.replace('*', '')
+
+# 📡 Λήψη των bytes της εικόνας από το Google Script Proxy
+try:
+    print("📡 Λήψη εικόνας από το Google Slide Proxy...")
+    response = requests.get(clean_url, timeout=30)
+    if response.status_code == 200:
+        with open(TEMP_PNG, "wb") as f:
+            f.write(response.content)
+        print("✅ Η εικόνα κατέβηκε επιτυχώς.")
+    else:
+        print(f"❌ Σφάλμα Google Proxy HTTP Code: {response.status_code}")
+        exit(1)
+except Exception as e:
+    print(f"❌ Αποτυχία σύνδεσης στο Google Proxy: {str(e)}")
+    exit(1)
+
+# 🎨 Επεξεργασία και Μετατροπή σε 3-Color Bytes (Black/White/Red)
+try:
+    img = Image.open(TEMP_PNG).convert("RGB")
+    img = img.resize((400, 300))
+    new_bytes = bytearray()
+    
+    for y in range(300):
+        for x in range(400):
+            r, g, b = img.getpixel((x, y))
+            if r > 200 and g < 50 and b < 50:  # Κόκκινο
+                new_bytes.append(2)
+            elif r > 150 and g > 150 and b > 150:  # Λευκό
+                new_bytes.append(1)
+            else:  # Μαύρο
+                new_bytes.append(0)
+                
+    with open(TEMP_BIN, "wb") as f:
+        f.write(new_bytes)
+        
+except Exception as e:
+    print(f"❌ Αποτυχία low-level επεξεργασίας εικόνας: {str(e)}")
+    if os.path.exists(TEMP_PNG): os.remove(TEMP_PNG)
+    exit(1)
+
+# 🔬 Σύγκριση Bytes με το προηγούμενο αρχείο (Η Λογική του Server Guard)
+if os.path.exists(BIN_PATH):
+    print("🔬 Ανιχνεύθηκε υπάρχον αρχείο image.bin. Έναρξη σύγκρισης bytes...")
+    with open(BIN_PATH, "rb") as f:
+        old_bytes = f.read()
+        
+    with open(TEMP_BIN, "rb") as f:
+        current_bytes = f.read()
+        
+    if old_bytes == current_bytes:
+        print("🛑 MATCH: Τα bytes είναι ολόιδια! Η ατζέντα δεν άλλαξε.")
+        print("Locks: Ακύρωση εγγραφής. Το image.bin ΔΕΝ θα αντικατασταθεί.")
+        if os.path.exists(TEMP_PNG): os.remove(TEMP_PNG)
+        if os.path.exists(TEMP_BIN): os.remove(TEMP_BIN)
+        exit(0)
+    else:
+        print("📢 NEW DATA: Ανιχνεύθηκαν αλλαγές στα pixels της ατζέντας!")
+
+os.replace(TEMP_BIN, BIN_PATH)
+print("💾 Το νέο image.bin αποθηκεύτηκε επιτυχώς!")
+
+if os.path.exists(TEMP_PNG): 
+    os.remove(TEMP_PNG)
+
+print("🏁 Server-Side Guard ολοκληρώθηκε.")
+
+
+
+
+
