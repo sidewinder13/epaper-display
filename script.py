@@ -8,13 +8,14 @@ BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
 
-print("🚀 Έναρξη Server-Side Python Guard με Live PNG Preview...")
 
+
+print("🚀 Έναρξη Server-Side Python Guard με Live PNG Preview...")
 
 # 📡 1. Λήψη δεδομένων από το Google Script Proxy
 try:
     print("📡 Λήψη δεδομένων από το Google Slide Proxy...")
-    response = requests.get(clean_url, timeout=30)
+    response = requests.get(GOOGLE_SCRIPT_URL, timeout=30)
     if response.status_code == 200:
         raw_text = response.text.strip()
         print("🔬 Μετατροπή Decimal String σε Raw Image Bytes...")
@@ -99,7 +100,6 @@ try:
         if os.path.exists(BIN_PATH): os.remove(BIN_PATH)
         os.rename(TEMP_BIN, BIN_PATH)
         
-        # 🔥 Αποθήκευση της πραγματικής εικόνας PNG για να τη βλέπεις στον browser
         if os.path.exists(PREVIEW_PATH): os.remove(PREVIEW_PATH)
         os.rename(TEMP_PNG, PREVIEW_PATH)
         print("💾 Το αρχείο image.bin και το οπτικό preview.png αποθηκεύτηκαν επιτυχώς!")
