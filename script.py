@@ -4,11 +4,18 @@ import requests
 from PIL import Image
 
 # 📋 Τάσο, εδώ υπάρχει URL! Πήγαινε στη γραμμή 7 να το δεις και βάλε το δικό σου:
-GOOGLE_SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnT4GV0xXgvAMTwsn85M4KmiXfRAEENM5HmWedc6JAbwn3uBpJWMyVyGZ-fUjVy5JoR6yRm2OqUJtwyVyjL572Rl3XV31KCVomrARSwNos-ORP3PljSb4z7jwQsiJUbtox3KGlthoh6JhMCsMotj4kNqqXt0VfWVa6FWSEEJpF7QXxcoqsNsJ4HB2G4r_v0hq7UDsWVTM1-5U5D9ezo-xWf3PfUbr7-gqRp4ps_t3v3UwzJdVnBULv0c4uUU24-ErNcTo_471uD6ZbAyZlV1_OGN2OHPeQ&lib=Mm1ufKnYuJ-Ps5c1lsDNhXOhMY1gs6E2h"
+#GOOGLE_SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnT4GV0xXgvAMTwsn85M4KmiXfRAEENM5HmWedc6JAbwn3uBpJWMyVyGZ-fUjVy5JoR6yRm2OqUJtwyVyjL572Rl3XV31KCVomrARSwNos-ORP3PljSb4z7jwQsiJUbtox3KGlthoh6JhMCsMotj4kNqqXt0VfWVa6FWSEEJpF7QXxcoqsNsJ4HB2G4r_v0hq7UDsWVTM1-5U5D9ezo-xWf3PfUbr7-gqRp4ps_t3v3UwzJdVnBULv0c4uUU24-ErNcTo_471uD6ZbAyZlV1_OGN2OHPeQ&lib=Mm1ufKnYuJ-Ps5c1lsDNhXOhMY1gs6E2h"
+
+# GOOGLE_SCRIPT_URL (Με αστεράκια για ασφάλεια)
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWJ5zC54VwD3Nq6Z7vo3l6a8k_exec/exec"
+
 
 BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
+
+
+
 
 
 print("🚀 Έναρξη Server-Side Python Guard...")
@@ -20,12 +27,17 @@ try:
     print("📡 Λήψη εικόνας από το Google Slide Proxy...")
     response = requests.get(clean_url, timeout=30)
     if response.status_code == 200:
-        # Low-level έλεγχος: Αν η Google επέστρεψε HTML κείμενο αντί για εικόνα
-        content_type = response.headers.get('Content-Type', '')
-        if 'text/html' in content_type or response.content.startswith(b'<!DOCTYPE') or response.content.startswith(b'<html'):
-            print("❌ Low-Level Σφάλμα: Η Google επέστρεψε σελίδα HTML αντί για εικόνα!")
+        
+        # 🔬 ΕΛΕΓΧΟΣ MAGIC BYTES: Μια πραγματική εικόνα PNG ξεκινάει ΠΑΝΤΑ με τα bytes \x89PNG
+        is_png = response.content.startswith(b'\x89PNG')
+        
+        if not is_png:
+            print("❌ Low-Level Σφάλμα: Η Google ΔΕΝ επέστρεψε εικόνα PNG!")
             print("📝 Περιεχόμενο απάντησης (Πρώτοι 300 χαρακτήρες):")
-            print(response.text[:300])
+            try:
+                print(response.content[:300].decode('utf-8', errors='replace'))
+            except Exception:
+                print(str(response.content[:300]))
             exit(1)
             
         with open(TEMP_PNG, "wb") as f:
