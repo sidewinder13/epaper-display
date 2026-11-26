@@ -8,29 +8,39 @@ BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
 
-print("🚀 Έναρξη Server-Side Python Guard...")
+print("🚀 Έναρξη Server-Side Python Guard (Decimal Byte Array Parser)...")
 
-# 📡 1. Λήψη εικόνας από το Google Script Proxy
+# 📡 1. Λήψη δεδομένων από το Google Script Proxy
 try:
-    print("📡 Λήψη εικόνας από το Google Slide Proxy...")
+    print("📡 Λήψη δεδομένων από το Google Slide Proxy...")
     response = requests.get(GOOGLE_SCRIPT_URL, timeout=30)
     if response.status_code == 200:
+        raw_text = response.text.strip()
+        print("🔬 Μετατροπή Decimal String σε Raw Image Bytes...")
         
-        # 🔬 ΕΛΕΓΧΟΣ MAGIC BYTES: Μια πραγματική εικόνα PNG ξεκινάει ΠΑΝΤΑ με τα bytes \x89PNG
-        is_png = response.content.startswith(b'\x89PNG')
-        
-        if not is_png:
-            print("❌ Low-Level Σφάλμα: Η Google ΔΕΝ επέστρεψε εικόνα PNG!")
-            print("📝 Περιεχόμενο απάντησης (Πρώτοι 300 χαρακτήρες):")
-            try:
-                print(response.content[:300].decode('utf-8', errors='replace'))
-            except Exception:
-                print(str(response.content[:300]))
+        try:
+            # Σπάμε το κείμενο στα κόμματα και μετατρέπουμε κάθε αριθμό σε byte (0-255)
+            # Αν ο αριθμός είναι αρνητικός (π.χ. -119), η C++ / Python τον μετατρέπει σε 256 + X
+            byte_list = []
+            for num_str in raw_text.split(','):
+                val = int(num_str.strip())
+                if val < 0:
+                    val = 256 + val
+                byte_list.append(val)
+                
+            image_bytes = bytes(byte_list)
+        except Exception as parse_err:
+            print(f"❌ Αποτυχία low-level ανάλυσης των αριθμών: {str(parse_err)}")
+            exit(1)
+            
+        # Επιβεβαίωση Magic Bytes PNG μετά την ανασύνθεση
+        if not image_bytes.startswith(b'\x89PNG'):
+            print("❌ Low-Level Σφάλμα: Τα ανασυντεθειμένα bytes δεν αντιστοιχούν σε PNG!")
             exit(1)
             
         with open(TEMP_PNG, "wb") as f:
-            f.write(response.content)
-        print("✅ Η εικόνα κατέβηκε επιτυχώς.")
+            f.write(image_bytes)
+        print("✅ Η εικόνα PNG ανασυντέθηκε και αποθηκεύτηκε επιτυχώς.")
     else:
         print(f"❌ Σφάλμα Google Proxy HTTP Code: {response.status_code}")
         exit(1)
