@@ -5,7 +5,6 @@ from PIL import Image
 # 📢 ΤΑΣΟ, ΒΑΛΕ ΕΔΩ ΤΟ ΚΑΘΑΡΟ Web App URL ΣΟΥ (Αυτό που τελειώνει σε /exec)
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzX0fW8lz_fnKfbjUxbIMAIS9yPw-cpb_8ZBlxG9nvNHwdKFBrgd3DGW2s4HQWU0KcmKA/exec"
 
-
 BIN_PATH = "image.bin"
 PREVIEW_PATH = "preview.png"
 TEMP_PNG = "temp_slide.png"
@@ -13,7 +12,7 @@ TEMP_BIN = "temp_image.bin"
 
 
 
-print("🚀 Έναρξη Server-Side Python Guard με Live PNG Preview...")
+print("🚀 Έναρξη Server-Side Python Guard (30.000 Bytes Bitwise Encoder)...")
 
 # 📡 1. Λήψη δεδομένων από το Google Script Proxy
 try:
@@ -50,27 +49,42 @@ except Exception as e:
     print(f"❌ Αποτυχία σύνδεσης στο Google Proxy: {str(e)}")
     exit(1)
 
-# 🎨 2. Επεξεργασία και Μετατροπή σε 3-Color Bytes
+# 🎨 2. Επεξεργασία και Μετατροπή σε 30.000 Bytes (2 bits ανά pixel)
 try:
     img = Image.open(TEMP_PNG).convert("RGB")
     img = img.resize((400, 300))
-    new_bytes = bytearray()
     
+    black_buffer = bytearray(15000)
+    red_buffer = bytearray(15000)
+    
+    pixel_idx = 0
     for y in range(300):
         for x in range(400):
             r, g, b = img.getpixel((x, y))
-            if r > 200 and g < 50 and b < 50:  # Κόκκινο
-                new_bytes.append(2)
-            elif r > 150 and g > 150 and b > 150:  # Λευκό
-                new_bytes.append(1)
-            else:  # Μαύρο
-                new_bytes.append(0)
+            
+            byte_pos = pixel_idx // 8
+            bit_pos = 7 - (pixel_idx % 8)
+            
+            black_bit = 1
+            red_bit = 1
+            
+            if r > 200 and g < 50 and b < 50:  # Κόκκινο pixel
+                red_bit = 0
+            elif r < 100 and g < 100 and b < 100:  # Μαύρο pixel
+                black_bit = 0
                 
+            black_buffer[byte_pos] |= (black_bit << bit_pos)
+            red_buffer[byte_pos] |= (red_bit << bit_pos)
+            
+            pixel_idx += 1
+            
+    new_bytes = black_buffer + red_buffer
+    
     with open(TEMP_BIN, "wb") as f:
         f.write(new_bytes)
         
 except Exception as e:
-    print(f"❌ Αποτυχία low-level επεξεργασίας εικόνας: {str(e)}")
+    print(f"❌ Αποτυχία low-level bitwise συμπίεσης: {str(e)}")
     if os.path.exists(TEMP_PNG): os.remove(TEMP_PNG)
     exit(1)
 
@@ -97,7 +111,7 @@ if os.path.exists(BIN_PATH):
 else:
     print("📢 FIRST RUN: Το αρχείο image.bin δεν υπάρχει στον σέρβερ.")
 
-# 💾 4. Αποθήκευση των τελικών αρχείων (image.bin και οπτικό preview.png)
+# 💾 4. Αποθήκευση των τελικών αρχείων
 try:
     if os.path.exists(TEMP_BIN):
         if os.path.exists(BIN_PATH): os.remove(BIN_PATH)
@@ -105,7 +119,7 @@ try:
         
         if os.path.exists(PREVIEW_PATH): os.remove(PREVIEW_PATH)
         os.rename(TEMP_PNG, PREVIEW_PATH)
-        print("💾 Το αρχείο image.bin και το οπτικό preview.png αποθηκεύτηκαν επιτυχώς!")
+        print("💾 Το συμπιεσμένο image.bin (30KB) και το preview.png αποθηκεύτηκαν επιτυχώς!")
 except Exception as e:
     print(f"❌ Αποτυχία low-level αποθήκευσης αρχείων: {str(e)}")
     exit(1)
