@@ -4,9 +4,13 @@ from PIL import Image
 
 # 📢 ΤΑΣΟ, ΒΑΛΕ ΕΔΩ ΤΟ ΚΑΘΑΡΟ Web App URL ΣΟΥ (Αυτό που τελειώνει σε /exec)
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzX0fW8lz_fnKfbjUxbIMAIS9yPw-cpb_8ZBlxG9nvNHwdKFBrgd3DGW2s4HQWU0KcmKA/exec"
+
+
 BIN_PATH = "image.bin"
+PREVIEW_PATH = "preview.png"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
+
 
 
 print("🚀 Έναρξη Server-Side Python Guard με Live PNG Preview...")
