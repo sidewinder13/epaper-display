@@ -1,22 +1,12 @@
-
 import os
 import requests
 from PIL import Image
 
-# 📋 Τάσο, εδώ υπάρχει URL! Πήγαινε στη γραμμή 7 να το δεις και βάλε το δικό σου:
-#GOOGLE_SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnT4GV0xXgvAMTwsn85M4KmiXfRAEENM5HmWedc6JAbwn3uBpJWMyVyGZ-fUjVy5JoR6yRm2OqUJtwyVyjL572Rl3XV31KCVomrARSwNos-ORP3PljSb4z7jwQsiJUbtox3KGlthoh6JhMCsMotj4kNqqXt0VfWVa6FWSEEJpF7QXxcoqsNsJ4HB2G4r_v0hq7UDsWVTM1-5U5D9ezo-xWf3PfUbr7-gqRp4ps_t3v3UwzJdVnBULv0c4uUU24-ErNcTo_471uD6ZbAyZlV1_OGN2OHPeQ&lib=Mm1ufKnYuJ-Ps5c1lsDNhXOhMY1gs6E2h"
-
 # GOOGLE_SCRIPT_URL (Με αστεράκια για ασφάλεια)
-GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWJ5zC54VwD3Nq6Z7vo3l6a8k_exec/exec"
-
-
+GOOGLE_SCRIPT_URL = "h*t*t*p*s*:*/*/*s*c*r*i*p*t*.*g*o*o*g*l*e*.*c*o*m*/*m*a*c*r*o*s*/*s*/*A*K*f*y*c*b*w*W*J*5*z*C*5*4*V*w*D*3*N*q*6*Z*7*v*o*3*l*6*a*8*k*_*e*x*e*c*/*e*x*e*c"
 BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
-
-
-
-
 
 print("🚀 Έναρξη Server-Side Python Guard...")
 
