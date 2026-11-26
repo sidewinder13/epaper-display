@@ -26,6 +26,7 @@ jobs:
     - name: Run script
       run: python script.py
 
+    # 4. Commit και Push (Μόνο αν υπάρχει αλλαγή στο image.bin)
     - name: Commit changes
       run: |
         git config --local user.email "action@github.com"
@@ -33,7 +34,8 @@ jobs:
         if git diff --quiet image.bin; then
           echo "No changes detected in image.bin"
         else
-          git add image.bin
-          git commit -m "Live image update triggered by ESP32 hardware ping"
+          git add image.bin preview.png
+          git commit -m "Live image and preview update triggered by ESP32 hardware ping"
           git push
         fi
+
