@@ -23,10 +23,17 @@ jobs:
       - name: Run Python Bit-Packer
         run: python script.py
 
-      - name: Commit and Push All Generated Files
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
-          git add image.bin preview.png
-          git commit -m "Live image update triggered by ESP32 hardware ping" || echo "No changes to commit"
+         # 4. Commit και Push (Μόνο αν υπάρχει αλλαγή στο image.bin)
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        # Ο έλεγχος git diff βλέπει αν άλλαξε το image.bin
+        if git diff --quiet image.bin; then
+          print "🛑 Καμία αλλαγή στο image.bin. Παράκαμψη Commit."
+        else
+          git add image.bin
+          git commit -m "Live image update triggered by ESP32 hardware ping"
           git push
+        fi
+
