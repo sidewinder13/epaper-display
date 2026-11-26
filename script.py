@@ -2,20 +2,18 @@ import os
 import requests
 from PIL import Image
 
-# GOOGLE_SCRIPT_URL (Με αστεράκια για ασφάλεια)
-GOOGLE_SCRIPT_URL = "h*t*t*p*s*:*/*/*s*c*r*i*p*t*.*g*o*o*g*l*e*.*c*o*m*/*m*a*c*r*o*s*/*s*/*A*K*f*y*c*b*w*W*J*5*z*C*5*4*V*w*D*3*N*q*6*Z*7*v*o*3*l*6*a*8*k*_*e*x*e*c*/*e*x*e*c"
+# 📢 ΤΑΣΟ, ΒΑΛΕ ΕΔΩ ΤΟ ΚΑΘΑΡΟ Web App URL ΣΟΥ (Αυτό που τελειώνει σε /exec)
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzX0fW8lz_fnKfbjUxbIMAIS9yPw-cpb_8ZBlxG9nvNHwdKFBrgd3DGW2s4HQWU0KcmKA/exec"
 BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
 
 print("🚀 Έναρξη Server-Side Python Guard...")
 
-clean_url = GOOGLE_SCRIPT_URL.replace('*', '')
-
 # 📡 1. Λήψη εικόνας από το Google Script Proxy
 try:
     print("📡 Λήψη εικόνας από το Google Slide Proxy...")
-    response = requests.get(clean_url, timeout=30)
+    response = requests.get(GOOGLE_SCRIPT_URL, timeout=30)
     if response.status_code == 200:
         
         # 🔬 ΕΛΕΓΧΟΣ MAGIC BYTES: Μια πραγματική εικόνα PNG ξεκινάει ΠΑΝΤΑ με τα bytes \x89PNG
