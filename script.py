@@ -9,7 +9,6 @@ TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
 
 
-
 print("🚀 Έναρξη Server-Side Python Guard με Live PNG Preview...")
 
 # 📡 1. Λήψη δεδομένων από το Google Script Proxy
