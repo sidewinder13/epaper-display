@@ -8,19 +8,18 @@ BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
 
-print("🚀 Έναρξη Server-Side Python Guard (Decimal Byte Array Parser)...")
+print("🚀 Έναρξη Server-Side Python Guard με Live PNG Preview...")
+
 
 # 📡 1. Λήψη δεδομένων από το Google Script Proxy
 try:
     print("📡 Λήψη δεδομένων από το Google Slide Proxy...")
-    response = requests.get(GOOGLE_SCRIPT_URL, timeout=30)
+    response = requests.get(clean_url, timeout=30)
     if response.status_code == 200:
         raw_text = response.text.strip()
         print("🔬 Μετατροπή Decimal String σε Raw Image Bytes...")
         
         try:
-            # Σπάμε το κείμενο στα κόμματα και μετατρέπουμε κάθε αριθμό σε byte (0-255)
-            # Αν ο αριθμός είναι αρνητικός (π.χ. -119), η C++ / Python τον μετατρέπει σε 256 + X
             byte_list = []
             for num_str in raw_text.split(','):
                 val = int(num_str.strip())
@@ -33,14 +32,13 @@ try:
             print(f"❌ Αποτυχία low-level ανάλυσης των αριθμών: {str(parse_err)}")
             exit(1)
             
-        # Επιβεβαίωση Magic Bytes PNG μετά την ανασύνθεση
         if not image_bytes.startswith(b'\x89PNG'):
             print("❌ Low-Level Σφάλμα: Τα ανασυντεθειμένα bytes δεν αντιστοιχούν σε PNG!")
             exit(1)
             
         with open(TEMP_PNG, "wb") as f:
             f.write(image_bytes)
-        print("✅ Η εικόνα PNG ανασυντέθηκε και αποθηκεύτηκε επιτυχώς.")
+        print("✅ Η εικόνα PNG ανασυντέθηκε επιτυχώς.")
     else:
         print(f"❌ Σφάλμα Google Proxy HTTP Code: {response.status_code}")
         exit(1)
@@ -84,7 +82,7 @@ if os.path.exists(BIN_PATH):
             
         if old_bytes == current_bytes:
             print("🛑 MATCH: Τα bytes είναι ολόιδια! Η ατζέντα δεν άλλαξε.")
-            print("Locks: Ακύρωση εγγραφής. Το image.bin ΔΕΝ θα αντικατασταθεί.")
+            print("Locks: Ακύρωση εγγραφής. Το image.bin και το preview.png ΔΕΝ θα αντικατασταθούν.")
             if os.path.exists(TEMP_PNG): os.remove(TEMP_PNG)
             if os.path.exists(TEMP_BIN): os.remove(TEMP_BIN)
             exit(0)
@@ -93,20 +91,20 @@ if os.path.exists(BIN_PATH):
     except Exception as e:
         print(f"⚠️ Προειδοποίηση κατά την ανάγνωση του αρχείου: {str(e)}")
 else:
-    print("📢 FIRST RUN: Το αρχείο image.bin δεν υπάρχει στον σέρβερ. Θα δημιουργηθεί τώρα!")
+    print("📢 FIRST RUN: Το αρχείο image.bin δεν υπάρχει στον σέρβερ.")
 
-# 💾 4. Αντικατάσταση ή δημιουργία του επίσημου αρχείου
+# 💾 4. Αποθήκευση των τελικών αρχείων (image.bin και οπτικό preview.png)
 try:
     if os.path.exists(TEMP_BIN):
-        if os.path.exists(BIN_PATH):
-            os.remove(BIN_PATH)
+        if os.path.exists(BIN_PATH): os.remove(BIN_PATH)
         os.rename(TEMP_BIN, BIN_PATH)
-        print("💾 Το αρχείο image.bin αποθηκεύτηκε επιτυχώς στον σέρβερ!")
+        
+        # 🔥 Αποθήκευση της πραγματικής εικόνας PNG για να τη βλέπεις στον browser
+        if os.path.exists(PREVIEW_PATH): os.remove(PREVIEW_PATH)
+        os.rename(TEMP_PNG, PREVIEW_PATH)
+        print("💾 Το αρχείο image.bin και το οπτικό preview.png αποθηκεύτηκαν επιτυχώς!")
 except Exception as e:
-    print(f"❌ Αποτυχία low-level αποθήκευσης αρχείου: {str(e)}")
+    print(f"❌ Αποτυχία low-level αποθήκευσης αρχείων: {str(e)}")
     exit(1)
-
-if os.path.exists(TEMP_PNG): 
-    os.remove(TEMP_PNG)
 
 print("🏁 Server-Side Guard ολοκληρώθηκε.")
