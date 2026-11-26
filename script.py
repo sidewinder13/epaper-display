@@ -10,6 +10,7 @@ BIN_PATH = "image.bin"
 TEMP_PNG = "temp_slide.png"
 TEMP_BIN = "temp_image.bin"
 
+
 print("🚀 Έναρξη Server-Side Python Guard...")
 
 clean_url = GOOGLE_SCRIPT_URL.replace('*', '')
@@ -19,6 +20,14 @@ try:
     print("📡 Λήψη εικόνας από το Google Slide Proxy...")
     response = requests.get(clean_url, timeout=30)
     if response.status_code == 200:
+        # Low-level έλεγχος: Αν η Google επέστρεψε HTML κείμενο αντί για εικόνα
+        content_type = response.headers.get('Content-Type', '')
+        if 'text/html' in content_type or response.content.startswith(b'<!DOCTYPE') or response.content.startswith(b'<html'):
+            print("❌ Low-Level Σφάλμα: Η Google επέστρεψε σελίδα HTML αντί για εικόνα!")
+            print("📝 Περιεχόμενο απάντησης (Πρώτοι 300 χαρακτήρες):")
+            print(response.text[:300])
+            exit(1)
+            
         with open(TEMP_PNG, "wb") as f:
             f.write(response.content)
         print("✅ Η εικόνα κατέβηκε επιτυχώς.")
@@ -53,7 +62,7 @@ except Exception as e:
     if os.path.exists(TEMP_PNG): os.remove(TEMP_PNG)
     exit(1)
 
-# 🔬 3. Έλεγχος και Σύγκριση Bytes (Με low-level προστασία αν το αρχείο λείπει)
+# 🔬 3. Έλεγχος και Σύγκριση Bytes
 if os.path.exists(BIN_PATH):
     print("🔬 Ανιχνεύθηκε υπάρχον αρχείο image.bin. Έναρξη σύγκρισης bytes...")
     try:
